@@ -1,0 +1,145 @@
+syntax = "proto3";
+package mixnet;
+
+service Mix {
+  rpc NewRound(NewRoundRequest) returns (NewRoundResponse) {}
+  rpc EndRound(EndRoundRequest) returns (EndRoundResponse) {}
+
+  rpc AddMessages(stream AddMessagesRequest) returns (AddMessagesResponse) {}
+  rpc GetMessages(GetMessagesRequest) returns (GetMessagesResponse) {}
+  rpc StartRound(StartRoundRequest) returns (StartRoundResponse) {}
+
+  rpc SubmitCiphertexts(stream SubmitCiphertextsRequest) returns (SubmitCiphertextsResponse) {}
+  rpc VerifyProof(stream VerifyProofRequest) returns (VerifyProofResponse) {}
+  rpc ConfirmVerification(ConfirmVerificationRequest) returns (ConfirmVerificationResponse) {}
+
+  // inner ciphertext related
+  rpc GetInnerKey(GetInnerKeyRequest) returns (GetInnerKeyResponse) {}
+  rpc AddInnerCiphertexts(AddInnerCiphertextsRequest) returns (AddInnerCiphertextsResponse) {}
+  rpc GetPrivateInnerKey(GetPrivateInnerKeyRequest) returns (GetPrivateInnerKeyResponse) {}
+  rpc Finalize(FinalizeRequest) returns (FinalizeResponse) {}
+}
+
+message NewRoundRequest {
+  fixed64 round = 1;
+}
+
+message NewRoundResponse {
+
+}
+
+message EndRoundRequest {
+  fixed64 round = 1;
+}
+
+message EndRoundResponse {
+
+}
+
+message AddMessagesRequest {
+  fixed64 round = 1;
+  repeated bytes messages = 2;
+}
+
+message AddMessagesResponse {
+
+}
+
+message StartRoundRequest {
+  fixed64 round = 1;
+}
+
+message StartRoundResponse {
+
+}
+
+message GetMessagesRequest {
+  fixed64 round = 1;
+}
+
+message GetMessagesResponse {
+  repeated bytes messages = 1;
+}
+
+enum Source {
+  CLIENT = 0;
+  SERVER = 1;
+}
+
+message SubmitCiphertextsRequest {
+    fixed64 round = 1;
+    repeated bytes ciphertexts = 2;
+    repeated bytes proofs = 3;
+}
+
+message SubmitCiphertextsResponse {
+
+}
+
+message VerifyProofRequest {
+    fixed64 round = 1;
+    fixed32 index = 2;
+    repeated bytes keys = 3;
+    bytes proof = 5;
+}
+
+message VerifyProofResponse {
+
+}
+
+message ConfirmVerificationRequest {
+    fixed64 round = 1;
+    bool verified = 2;
+}
+
+message ConfirmVerificationResponse {
+
+}
+
+message PrivateKey {
+  bytes x = 1;
+}
+
+message PublicKey {
+  bytes x = 1;
+  bytes y = 2;
+}
+
+message Ciphertext {
+  bytes x = 1;
+  bytes y = 2;
+  bytes message = 3;
+}
+
+message GetInnerKeyRequest {
+  fixed64 round = 1;
+}
+
+message GetInnerKeyResponse {
+  bytes x = 1;
+  bytes y = 2;
+}
+
+message AddInnerCiphertextsRequest {
+  fixed64 round = 1;
+  repeated bytes messages = 2;
+}
+
+message AddInnerCiphertextsResponse {
+}
+
+message GetPrivateInnerKeyRequest {
+  fixed64 round = 1;
+}
+
+message GetPrivateInnerKeyResponse {
+  bytes private_key = 1;
+}
+
+message FinalizeRequest {
+  fixed64 round = 1;
+}
+
+message FinalizeResponse {
+  repeated bytes plaintexts = 1;
+}

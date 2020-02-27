@@ -1,0 +1,42 @@
+syntax = "proto3";
+package client;
+
+service Client {
+  rpc RegisterUsers(RegisterUsersRequest) returns (RegisterUsersResponse) {}
+  rpc GenerateMessages(GenerateMessagesRequest) returns (GenerateMessagesResponse) {}
+  rpc SubmitMessages(SubmitMessagesRequest) returns (SubmitMessagesResponse) {}
+  rpc DownloadMessages(DownloadMessagesRequest) returns (DownloadMessagesResponse) {}
+}
+
+message RegisterUsersRequest {
+  fixed64 round = 1;
+  fixed64 num_users = 2;
+}
+
+message RegisterUsersResponse {
+}
+
+message GenerateMessagesRequest {
+  fixed64 round = 1;
+  fixed64 msg_size = 2;
+}
+
+message GenerateMessagesResponse {
+
+}
+
+message SubmitMessagesRequest {
+  fixed64 round = 1;
+}
+
+message SubmitMessagesResponse {
+
+}
+
+message DownloadMessagesRequest {
+  fixed64 round = 1;
+}
+
+message DownloadMessagesResponse {
+
+}

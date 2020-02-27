@@ -1,0 +1,32 @@
+syntax = "proto3";
+package server;
+
+service XRD {
+  rpc NewRound(NewRoundRequest) returns (NewRoundResponse) {}
+  rpc EndRound(EndRoundRequest) returns (EndRoundResponse) {}
+  rpc StartRound(StartRoundRequest) returns (StartRoundResponse) {}
+}
+
+message NewRoundRequest {
+  fixed64 round = 1;
+}
+
+message NewRoundResponse {
+
+}
+
+message EndRoundRequest {
+  fixed64 round = 1;
+}
+
+message EndRoundResponse {
+
+}
+
+message StartRoundRequest {
+  fixed64 round = 1;
+}
+
+message StartRoundResponse {
+
+}

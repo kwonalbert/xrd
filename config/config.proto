@@ -1,0 +1,45 @@
+syntax = "proto3";
+package config;
+
+message Server {
+  string address = 1;
+  string id = 2;
+  // typically a certificate, but could be a signing key, or whatever
+  // else that could be used to authenticate itself
+  bytes identity = 3;
+  bytes private_identity = 4;
+  // onion encryption key
+  bytes public_key = 5;
+  bytes private_key = 6;
+  // extensions contain the blinding key
+  map<string, bytes> extensions = 7;
+}
+
+message Group {
+  string gid = 1;
+  fixed32 layer = 2;
+  fixed32 row = 3;
+  // server ids of this group
+  repeated string servers = 4;
+  // neighbors gids
+  repeated string predecessors = 5;
+  repeated string successors = 6;
+}
+
+message Layer {
+  fixed32 layer_id = 1;
+  // group ids of this layer
+  repeated string groups = 2;
+}
+
+message Servers {
+  map<string, Server> servers = 1;
+}
+
+message Groups {
+  map<string, Group> groups = 1;
+}
+
+message Layers {
+  repeated Layer layers = 1;
+}

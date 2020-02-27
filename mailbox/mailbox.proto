@@ -1,0 +1,74 @@
+syntax = "proto3";
+package mailbox;
+
+service Mailbox {
+  rpc NewRound(NewRoundRequest) returns (NewRoundResponse) {}
+  rpc EndRound(EndRoundRequest) returns (EndRoundResponse) {}
+
+  rpc RegisterUsers(stream RegisterUsersRequest) returns (RegisterUsersResponse) {}
+  rpc RegisteredUsers(RegisteredUsersRequest) returns (stream RegisteredUsersResponse) {}
+  rpc DeliverMails(stream DeliverMailsRequest) returns (DeliverMailsResponse) {}
+  rpc GetMails(stream GetMailsRequest) returns (stream GetMailsResponse) {}
+}
+
+message NewRoundRequest {
+  fixed64 round = 1;
+}
+
+message NewRoundResponse {
+
+}
+
+message EndRoundRequest {
+  fixed64 round = 1;
+}
+
+message EndRoundResponse {
+
+}
+
+message RegisterUsersRequest {
+  fixed64 round = 1;
+  repeated bytes user_keys = 2;
+  repeated fixed64 expected = 3; // expected number of messages per user
+}
+
+message RegisterUsersResponse {
+
+}
+
+message RegisteredUsersRequest {
+  fixed64 round = 1;
+}
+
+message RegisteredUsersResponse {
+  repeated bytes user_keys = 1;
+}
+
+message Inbox {
+  bytes user_key = 1;
+  repeated bytes messages = 2;
+}
+
+message Mail {
+  bytes user_key = 1;
+  bytes message = 2;
+}
+
+message DeliverMailsRequest {
+  fixed64 round = 1;
+  repeated Mail mails = 2;
+}
+
+message DeliverMailsResponse {
+
+}
+
+message GetMailsRequest {
+  fixed64 round = 1;
+  repeated bytes user_keys = 2;
+}
+
+message GetMailsResponse {
+  repeated Inbox inboxes = 1;
+}
