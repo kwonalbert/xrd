@@ -18,7 +18,7 @@ import (
 	"time"
 
 	"github.com/kwonalbert/xrd/config"
-	"github.com/kwonalbert/mixnet"
+	"github.com/kwonalbert/xrd/mixnet/verifiable_mixnet"
 	grpc "google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
@@ -100,7 +100,7 @@ func createTestCiphertexts(num int, servers map[string]*config.Server, group *co
 	auxs := make([][]byte, n)
 	nonces := make([][]byte, n)
 	for i := range nonces {
-		nonce := mixnet.Nonce(0, int(group.Row), i)
+		nonce := verifiable_mixnet.Nonce(0, int(group.Row), i)
 		nonces[i] = nonce[:]
 	}
 
@@ -113,7 +113,7 @@ func createTestCiphertexts(num int, servers map[string]*config.Server, group *co
 		msgs[i] = make([]byte, 10)
 		rand.Read(msgs[i])
 
-		ciphertexts[i], prfs[i] = mixnet.P256OnionEncrypt(msgs[i], auxs, nonces, publicKeys, true)
+		ciphertexts[i], prfs[i] = verifiable_mixnet.P256OnionEncrypt(msgs[i], auxs, nonces, publicKeys, true)
 	}
 
 	return msgs, ciphertexts, prfs

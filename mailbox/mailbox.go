@@ -8,7 +8,7 @@ import (
 
 	"github.com/kwonalbert/xrd/config"
 	"github.com/kwonalbert/xrd/span"
-	
+
 	"golang.org/x/net/context"
 )
 

@@ -73,7 +73,7 @@ func TestBasicMailbox(t *testing.T) {
 		for j := range msgs[i] {
 			msgs[i][j] = make([]byte, 100)
 			rand.Read(msgs[i][j])
-			mails[i*msgsPerUser+j] = SealMail(pubs[i], &nonce, msgs[i][j])
+			mails[i*msgsPerUser+j] = SealMail(pubs[i], privs[i], &nonce, msgs[i][j])
 		}
 	}
 
@@ -115,44 +115,51 @@ func TestBasicMailbox(t *testing.T) {
 		t.Error(err)
 	}
 
-	getReq := &GetMailsRequest{
-		Round:    0,
-		UserKeys: keys,
-	}
-	inStream, err := mailbox.GetMails(context.Background(), getReq)
+	inStream, err := mailbox.GetMails(context.Background())
 	if err != nil {
 		t.Error(err)
 	}
 
 	total := 0
-	for {
-		resp, err := inStream.Recv()
-		if err == io.EOF {
-			break
-		} else if err != nil {
-			t.Fatal(err)
-		}
 
-		for i, inbox := range resp.Inboxes {
-			for _, mail := range inbox.Messages {
-				msg := OpenMail(privs[i], &nonce, mail)
+	getReq := &GetMailsRequest{
+		Round:    0,
+		UserKeys: keys,
+	}
+	err = inStream.Send(getReq)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-				found := false
-				for j := range msgs[i] {
-					if bytes.Equal(msgs[i][j], msg) {
-						found = true
-						break
-					}
-				}
-				if !found {
-					t.Error("Unexpected messages")
-				}
-				total += 1
+	resp, err := inStream.Recv()
+	if err != nil && err != io.EOF {
+		t.Fatal(err)
+	}
+
+	for i, inbox := range resp.Inboxes {
+		for _, mail := range inbox.Messages {
+			msg := OpenMail(pubs[i], privs[i], &nonce, mail)
+			if msg == nil {
+				t.Fatal("Failed to open a message")
 			}
+
+			found := false
+			for j := range msgs[i] {
+				if bytes.Equal(msgs[i][j], msg) {
+					found = true
+					break
+				}
+			}
+			if !found {
+				t.Fatal("Unexpected messages")
+			}
+			total += 1
 		}
 	}
 
 	if total != numUsers*msgsPerUser {
-		t.Error("Not enough messages")
+		t.Fatal("Not enough messages")
 	}
+
+	inStream.CloseSend()
 }
