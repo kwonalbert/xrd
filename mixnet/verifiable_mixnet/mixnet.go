@@ -86,18 +86,18 @@ type server struct {
 }
 
 type DecryptionJob struct {
-	privateKey   *[BOX_KEY_SIZE]byte
-	ciphertext   []byte
-	auxProcessor AuxProcessor
+	PrivateKey   *[BOX_KEY_SIZE]byte
+	Ciphertext   []byte
+	AuxProcessor AuxProcessor
 
-	privateBlindKey []byte
+	PrivateBlindKey []byte
 
-	idx    int
-	result [][]byte
+	Idx    int
+	Result [][]byte
 
 	// for verifiable decryption
-	prodWg  *sync.WaitGroup
-	prodJob chan []byte
+	ProdWg  *sync.WaitGroup
+	ProdJob chan []byte
 }
 
 type roundState struct {
@@ -289,19 +289,19 @@ func (srv *server) AddMessages(round int, msgs [][]byte) error {
 	go func(state *roundState) {
 		for i, msg := range msgs {
 			job := DecryptionJob{
-				privateKey:   state.privateKey,
-				ciphertext:   msg,
-				auxProcessor: state.auxProcessor,
+				PrivateKey:   state.privateKey,
+				Ciphertext:   msg,
+				AuxProcessor: state.auxProcessor,
 
-				privateBlindKey: state.privateBlindKey,
+				PrivateBlindKey: state.privateBlindKey,
 
-				idx:    i,
-				result: result,
+				Idx:    i,
+				Result: result,
 			}
 
 			if !state.config.Last && state.config.Verifiable {
-				job.prodWg = state.prodWgs[state.config.Index+1]
-				job.prodJob = state.prodJobs[state.config.Index+1]
+				job.ProdWg = state.prodWgs[state.config.Index+1]
+				job.ProdJob = state.prodJobs[state.config.Index+1]
 			}
 
 			state.jobs <- job

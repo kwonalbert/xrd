@@ -46,21 +46,21 @@ func Nonce(round, row, index int) [NONCE_SIZE]byte {
 func defaultDecryptionWorker(nonce *[NONCE_SIZE]byte, auxSize int, wg *sync.WaitGroup, jobs chan DecryptionJob) {
 	var theirKey [BOX_KEY_SIZE]byte
 	for job := range jobs {
-		copy(theirKey[:], job.ciphertext[:BOX_KEY_SIZE])
+		copy(theirKey[:], job.Ciphertext[:BOX_KEY_SIZE])
 
-		res, ok := Open(nil, job.ciphertext[BOX_KEY_SIZE+auxSize:], nonce, &theirKey, job.privateKey)
+		res, ok := Open(nil, job.Ciphertext[BOX_KEY_SIZE+auxSize:], nonce, &theirKey, job.PrivateKey)
 		if !ok {
-			job.result[job.idx] = nil
+			job.Result[job.Idx] = nil
 			log.Println("open failed")
 			wg.Done()
 			continue
 		}
 
 		var na []byte = nil
-		if job.auxProcessor != nil {
-			ok, na = job.auxProcessor(job.ciphertext, res, auxSize)
+		if job.AuxProcessor != nil {
+			ok, na = job.AuxProcessor(job.Ciphertext, res, auxSize)
 			if !ok {
-				job.result[job.idx] = nil
+				job.Result[job.Idx] = nil
 				log.Println("auxprocessor failed")
 				wg.Done()
 				continue
@@ -70,7 +70,7 @@ func defaultDecryptionWorker(nonce *[NONCE_SIZE]byte, auxSize int, wg *sync.Wait
 		if na != nil {
 			res = append(na, res...)
 		}
-		job.result[job.idx] = res
+		job.Result[job.Idx] = res
 		wg.Done()
 	}
 }
@@ -175,9 +175,9 @@ func P256DecryptionWorker(nonce *[NONCE_SIZE]byte, auxSize int, wg *sync.WaitGro
 	theirKeyX, theirKeyY := new(big.Int), new(big.Int)
 	var sharedKey [SHARED_KEY_SIZE]byte
 	for job := range jobs {
-		theirKeyX.SetBytes(job.ciphertext[:POINT_SIZE/2])
-		theirKeyY.SetBytes(job.ciphertext[POINT_SIZE/2 : POINT_SIZE])
-		sharedX, _ := curve.ScalarMult(theirKeyX, theirKeyY, (*job.privateKey)[:])
+		theirKeyX.SetBytes(job.Ciphertext[:POINT_SIZE/2])
+		theirKeyY.SetBytes(job.Ciphertext[POINT_SIZE/2 : POINT_SIZE])
+		sharedX, _ := curve.ScalarMult(theirKeyX, theirKeyY, (*job.PrivateKey)[:])
 		sxb := sharedX.Bytes()
 		// explicitly zero out the rest, since we are reusing arrays
 		copy(sharedKey[SHARED_KEY_SIZE-len(sxb):], sxb)
@@ -185,30 +185,30 @@ func P256DecryptionWorker(nonce *[NONCE_SIZE]byte, auxSize int, wg *sync.WaitGro
 			sharedKey[b] = 0
 		}
 
-		blindX, blindY := curve.ScalarMult(theirKeyX, theirKeyY, job.privateBlindKey)
+		blindX, blindY := curve.ScalarMult(theirKeyX, theirKeyY, job.PrivateBlindKey)
 
 		bxb, byb := blindX.Bytes(), blindY.Bytes()
 		res := make([]byte, POINT_SIZE,
-			len(job.ciphertext)-Overhead-auxSize)
+			len(job.Ciphertext)-Overhead-auxSize)
 		copy(res[POINT_SIZE/2-len(bxb):], bxb)
 		copy(res[POINT_SIZE-len(byb):], byb)
 
-		if job.prodJob != nil {
-			job.prodWg.Add(1)
-			job.prodJob <- res[:POINT_SIZE]
+		if job.ProdJob != nil {
+			job.ProdWg.Add(1)
+			job.ProdJob <- res[:POINT_SIZE]
 		}
 
 		// append to res
-		res, ok := SecretOpen(res, job.ciphertext[POINT_SIZE+auxSize:],
+		res, ok := SecretOpen(res, job.Ciphertext[POINT_SIZE+auxSize:],
 			nonce, &sharedKey)
 		if !ok {
-			job.result[job.idx] = nil
+			job.Result[job.Idx] = nil
 			log.Println("open failed")
 			wg.Done()
 			continue
 		}
 
-		job.result[job.idx] = res
+		job.Result[job.Idx] = res
 		wg.Done()
 	}
 }
